@@ -308,7 +308,7 @@ function Index() {
               <span className="mono inline-flex items-center rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-accent lg:mx-0 mx-auto">
                 Secure file sharing
               </span>
-              <h1 className="text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl leading-tight">
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl leading-tight">
                 Drop any file.
                 <br />
                 <span className="text-accent">Share it anywhere.</span>
