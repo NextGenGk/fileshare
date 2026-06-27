@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 # 2. Copy the returned id into the field below
 [[kv_namespaces]]
 binding = "FILESHARE_RATE_LIMIT"
-id = "YOUR_KV_NAMESPACE_ID"
+id = "40382be173564935b1c845bb6d97e1f4"
 
 [vars]
 NITRO_PRESET = "cloudflare-module"
