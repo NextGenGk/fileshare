@@ -27,7 +27,11 @@ export const Route = createFileRoute("/api/public/v1/uploads/$id/complete")({
         if (drop.ownerId && drop.ownerId !== caller.userId)
           return json({ error: "forbidden" }, { status: 403 });
 
-        const exists = await fileExists(drop.id);
+        let exists = await fileExists(drop.id);
+        if (!exists) {
+          await new Promise((r) => setTimeout(r, 600));
+          exists = await fileExists(drop.id);
+        }
         if (!exists) return json({ error: "upload_missing" }, { status: 400 });
 
         const realSize = await fileSize(drop.id);
