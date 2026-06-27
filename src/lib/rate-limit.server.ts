@@ -38,8 +38,8 @@ function key(request: Request, userId: string | null, apiKeyId: string | null): 
     ? `ak:${apiKeyId}`
     : userId
       ? `u:${userId}`
-      : request.headers.get("cf-connecting-ip") ||
-        request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      : request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("cf-connecting-ip") ||
         "unknown";
   return createHash("sha256").update(raw).digest("hex").slice(0, 16);
 }
