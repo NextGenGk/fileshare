@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { resolveCaller, json, corsPreflight, ipHash, fileResponse } from "@/lib/api-auth.server";
+import { resolveCaller, json, corsPreflight, ipHash } from "@/lib/api-auth.server";
 import { checkRateLimit, rateLimitHeaders, sweepExpired } from "@/lib/rate-limit.server";
 import { prisma } from "@/integrations/prisma/client.server";
-import { readFile } from "@/lib/storage.server";
+import { createDownloadUrl } from "@/lib/storage.server";
 
 export const Route = createFileRoute("/api/public/v1/claims/$code")({
   server: {
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/api/public/v1/claims/$code")({
         if (d.maxDownloads && d.downloadCount >= d.maxDownloads)
           return json({ error: "exhausted" }, { status: 410 });
 
-        const buf = await readFile(d.id);
+        const downloadUrl = await createDownloadUrl(d.id);
 
         await prisma().drop.update({ where: { id: d.id }, data: { claimCode: null } });
         await prisma().drop.update({
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/api/public/v1/claims/$code")({
           },
         });
 
-        return fileResponse(buf, d.contentType || "application/octet-stream", d.originalName);
+        return Response.redirect(downloadUrl, 302);
       },
       GET: async ({ request, params }) => {
         sweepExpired();

@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash } from "node:crypto";
-import { resolveCaller, json, corsPreflight, ipHash, fileResponse } from "@/lib/api-auth.server";
+import { resolveCaller, json, corsPreflight, ipHash } from "@/lib/api-auth.server";
 import { checkRateLimit, rateLimitHeaders, sweepExpired } from "@/lib/rate-limit.server";
 import { prisma } from "@/integrations/prisma/client.server";
-import { deleteFile, readFile } from "@/lib/storage.server";
+import { deleteFile, createDownloadUrl } from "@/lib/storage.server";
 
 export const Route = createFileRoute("/api/files/$slug")({
   server: {
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/api/files/$slug")({
           if (hash !== d.passwordHash) return json({ error: "bad_password" }, { status: 401 });
         }
 
-        const buf = await readFile(d.id);
+        const downloadUrl = await createDownloadUrl(d.id);
 
         await prisma().drop.update({
           where: { id: d.id },
@@ -66,7 +66,7 @@ export const Route = createFileRoute("/api/files/$slug")({
           },
         });
 
-        return fileResponse(buf, d.contentType || "application/octet-stream", d.originalName);
+        return Response.redirect(downloadUrl, 302);
       },
       GET: async ({ request, params }) => {
         sweepExpired();

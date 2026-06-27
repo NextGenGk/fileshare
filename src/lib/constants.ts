@@ -1,4 +1,4 @@
-export const MAX_FILE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
+export const MAX_FILE_BYTES = 500 * 1024 * 1024; // 500 MB
 export const DEFAULT_EXPIRY_DAYS = 30;
 export const MAX_EXPIRY_DAYS = 30;
 export const SIGNED_DOWNLOAD_TTL = 60 * 60; // 1 hour

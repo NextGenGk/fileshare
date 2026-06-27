@@ -14,6 +14,7 @@ import {
 } from "@/lib/constants";
 import { createHash } from "node:crypto";
 import { prisma } from "@/integrations/prisma/client.server";
+import { createUploadUrl } from "@/lib/storage.server";
 
 const slugify = customAlphabet(SLUG_ALPHABET, SLUG_LENGTH);
 
@@ -106,6 +107,11 @@ export const Route = createFileRoute("/api/public/v1/uploads/init")({
           }
         }
 
+        const uploadUrl = await createUploadUrl(
+          id,
+          parsed.data.contentType || "application/octet-stream",
+          parsed.data.size,
+        );
         const origin = new URL(request.url).origin;
         return json({
           ...rateLimitHeaders("upload", rl.remaining, rl.reset),
@@ -113,7 +119,7 @@ export const Route = createFileRoute("/api/public/v1/uploads/init")({
           slug,
           deliveryMode: parsed.data.deliveryMode,
           claimCode,
-          uploadUrl: `${origin}/api/public/v1/uploads/${id}/file`,
+          uploadUrl,
           shareUrl: `${origin}/d/${slug}`,
           expiresAt,
         });

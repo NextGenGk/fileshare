@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { resolveCaller, json, corsPreflight } from "@/lib/api-auth.server";
 import { checkRateLimit, rateLimitHeaders, sweepExpired } from "@/lib/rate-limit.server";
-import { MAX_EXPIRY_DAYS } from "@/lib/constants";
+import { MAX_EXPIRY_DAYS, MAX_FILE_BYTES } from "@/lib/constants";
 
 export const Route = createFileRoute("/api/cli/config")({
   server: {
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/api/cli/config")({
         return json({
           ...rateLimitHeaders("config", rl.remaining, rl.reset),
           maxExpiryDays: MAX_EXPIRY_DAYS,
-          maxFileBytes: 2 * 1024 * 1024 * 1024,
+          maxFileBytes: MAX_FILE_BYTES,
           defaultDuration: "24h",
           durationOptions: ["1h", "24h", "3d", "7d"],
           maxRecipients: 0,

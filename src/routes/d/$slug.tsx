@@ -60,7 +60,7 @@ function DropPage() {
   const onDownload = async () => {
     setDownloading(true);
     try {
-      const r = await fetch(`/api/public/v1/drops/${slug}/download`, {
+      const r = await fetch(`/api/public/v1/drops/${slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

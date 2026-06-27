@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { resolveCaller, json, corsPreflight } from "@/lib/api-auth.server";
 import { checkRateLimit, rateLimitHeaders, sweepExpired } from "@/lib/rate-limit.server";
 import { prisma } from "@/integrations/prisma/client.server";
-import { writeFile } from "@/lib/storage.server";
+import { fileExists } from "@/lib/storage.server";
 
 export const Route = createFileRoute("/api/uploads/$id/file")({
   server: {
@@ -24,9 +24,8 @@ export const Route = createFileRoute("/api/uploads/$id/file")({
         });
         if (!drop) return json({ error: "not_found" }, { status: 404 });
 
-        const buf = await request.arrayBuffer();
-        await writeFile(drop.id, buf);
-
+        const exists = await fileExists(drop.id);
+        if (!exists) return json({ error: "upload_missing" }, { status: 400 });
         return new Response(null, { status: 200 });
       },
     },

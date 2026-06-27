@@ -40,12 +40,12 @@ export const Route = createFileRoute("/")({
       { title: "FileShare — send big files, fast" },
       {
         name: "description",
-        content: "Drop a file. Share a link. Up to 2GB. Expires automatically.",
+        content: "Drop a file. Share a link. Up to 500MB. Expires automatically.",
       },
       { property: "og:title", content: "FileShare — send big files, fast" },
       {
         property: "og:description",
-        content: "Drop a file. Share a link. Up to 2GB. Expires automatically.",
+        content: "Drop a file. Share a link. Up to 500MB. Expires automatically.",
       },
     ],
   }),
@@ -79,8 +79,8 @@ function Index() {
 
   const uploadSingle = useCallback(
     async (f: File) => {
-      if (f.size > 2 * 1024 * 1024 * 1024) {
-        toast.error("File exceeds 2 GB limit");
+      if (f.size > 500 * 1024 * 1024) {
+        toast.error("File exceeds 500 MB limit");
         return;
       }
       setFiles([f]);
@@ -163,8 +163,8 @@ function Index() {
         }
         const blob = await zip.generateAsync({ type: "blob" });
         const totalSize = blob.size;
-        if (totalSize > 2 * 1024 * 1024 * 1024) {
-          toast.error("Compressed files exceed 2 GB limit");
+        if (totalSize > 500 * 1024 * 1024) {
+          toast.error("Compressed files exceed 500 MB limit");
           return;
         }
         const zipName = "files.zip";
@@ -645,7 +645,7 @@ function Index() {
         <div className="mx-auto max-w-6xl px-4 py-10">
           <div className="grid grid-cols-2 gap-4 sm:gap-8 sm:grid-cols-4">
             <div className="text-center">
-              <p className="text-xl font-bold sm:text-3xl">2 GB</p>
+              <p className="text-xl font-bold sm:text-3xl">500 MB</p>
               <p className="mt-1 mono text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 Max transfer size
               </p>
@@ -754,7 +754,7 @@ function Index() {
               <div className="rounded-xl border border-border/60 bg-card p-4 sm:p-5">
                 <p className="mono text-sm font-semibold">WeTransfer</p>
                 <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-                  Consumer-grade bloat. Ads, upsells, and a 2 GB limit that disappears behind a
+                  Consumer-grade bloat. Ads, upsells, and a 500 MB limit that disappears behind a
                   paywall. No CLI, no API, no thanks.
                 </p>
               </div>
@@ -837,8 +837,8 @@ function Index() {
               <AccordionItem value="size">
                 <AccordionTrigger>What is the maximum file size I can send?</AccordionTrigger>
                 <AccordionContent>
-                  You can send files up to 2 GB for free. There are no limits on the number of files
-                  you can send, though each upload is capped at 2 GB.
+                  You can send files up to 500 MB for free. There are no limits on the number of
+                  files you can send, though each upload is capped at 500 MB.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="expiry">
@@ -892,7 +892,7 @@ function Index() {
             Drop a file. Share a link.
           </h2>
           <p className="mt-3 text-sm text-muted-foreground max-w-md mx-auto">
-            No sign-up required. Files expire automatically. Up to 2 GB.
+            No sign-up required. Files expire automatically. Up to 500 MB.
           </p>
           <Button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="mt-6">
             <Upload className="mr-2 h-4 w-4" />

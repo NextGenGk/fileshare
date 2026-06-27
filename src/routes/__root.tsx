@@ -94,13 +94,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Drop a file, share a link. Up to 2GB, expires automatically. Web UI, REST API, and CLI.",
+          "Drop a file, share a link. Up to 500 MB, expires automatically. Web UI, REST API, and CLI.",
       },
       { name: "author", content: "FileShare" },
       { property: "og:title", content: "FileShare — send big files, fast" },
       {
         property: "og:description",
-        content: "Drop a file, share a link. Up to 2GB, expires automatically.",
+        content: "Drop a file, share a link. Up to 500 MB, expires automatically.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

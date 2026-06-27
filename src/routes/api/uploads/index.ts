@@ -13,6 +13,7 @@ import {
   SLUG_LENGTH,
 } from "@/lib/constants";
 import { prisma } from "@/integrations/prisma/client.server";
+import { createUploadUrl } from "@/lib/storage.server";
 
 const slugify = customAlphabet(SLUG_ALPHABET, SLUG_LENGTH);
 
@@ -116,13 +117,18 @@ export const Route = createFileRoute("/api/uploads/")({
           }
         }
 
+        const uploadUrl = await createUploadUrl(
+          id,
+          contentType || "application/octet-stream",
+          size,
+        );
         const origin = new URL(request.url).origin;
         return json({
           uploadId: id,
           shareId: slug,
           url: `${origin}/d/${slug}`,
           expiresAt: expiresAt.toISOString(),
-          uploadUrl: `${origin}/api/uploads/${id}/file`,
+          uploadUrl,
           deliveryMode,
           passwordRequired: !!password,
           maxDownloads: maxDl ?? null,

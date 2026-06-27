@@ -13,7 +13,6 @@ import {
   SLUG_LENGTH,
 } from "@/lib/constants";
 import { prisma } from "@/integrations/prisma/client.server";
-import { writeFile } from "@/lib/storage.server";
 
 const slugify = customAlphabet(SLUG_ALPHABET, SLUG_LENGTH);
 
@@ -70,6 +69,12 @@ export const Route = createFileRoute("/api/upload")({
         const buf = await fileField.arrayBuffer();
         if (buf.byteLength > MAX_FILE_BYTES) {
           return json({ error: "file_too_large" }, { status: 413 });
+        }
+        if (buf.byteLength > 4 * 1024 * 1024) {
+          return json(
+            { error: "use_web_ui", message: "Files over 4 MB must use the web UI upload flow" },
+            { status: 413 },
+          );
         }
 
         const durationRaw = form.get("duration");
