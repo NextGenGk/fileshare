@@ -117,11 +117,12 @@ export const Route = createFileRoute("/api/uploads/")({
           }
         }
 
-        const uploadUrl = await createUploadUrl(
-          id,
-          contentType || "application/octet-stream",
-          size,
-        );
+        let uploadUrl: string;
+        try {
+          uploadUrl = await createUploadUrl(id, contentType || "application/octet-stream", size);
+        } catch (err) {
+          return json({ error: "storage_error", message: String(err) }, { status: 500 });
+        }
         const origin = new URL(request.url).origin;
         return json({
           uploadId: id,

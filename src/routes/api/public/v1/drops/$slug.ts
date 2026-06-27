@@ -51,7 +51,12 @@ export const Route = createFileRoute("/api/public/v1/drops/$slug")({
           if (hash !== d.passwordHash) return json({ error: "bad_password" }, { status: 401 });
         }
 
-        const downloadUrl = await createDownloadUrl(d.id);
+        let downloadUrl: string;
+        try {
+          downloadUrl = await createDownloadUrl(d.id);
+        } catch (err) {
+          return json({ error: "storage_error", message: String(err) }, { status: 500 });
+        }
 
         await prisma().drop.update({
           where: { id: d.id },
