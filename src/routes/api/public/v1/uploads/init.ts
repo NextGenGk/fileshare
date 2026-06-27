@@ -47,6 +47,11 @@ export const Route = createFileRoute("/api/public/v1/uploads/init")({
           );
         }
 
+        const isWebClient = request.headers.get("x-fileshare-web") === "true";
+        if (!caller.userId && !isWebClient) {
+          return json({ error: "unauthorized", message: "API key is required for API and CLI uploads." }, { status: 401 });
+        }
+
         let body: unknown;
         try {
           body = await request.json();
@@ -62,9 +67,12 @@ export const Route = createFileRoute("/api/public/v1/uploads/init")({
 
         const slug = slugify();
         const id = crypto.randomUUID();
-        const expiresAt = new Date(
-          Date.now() + (parsed.data.expiresInDays ?? DEFAULT_EXPIRY_DAYS) * 86400_000,
-        ).toISOString();
+        const isAuth = !!caller.userId;
+        const msTillExpiry = isAuth
+          ? (parsed.data.expiresInDays ?? DEFAULT_EXPIRY_DAYS) * 86400_000
+          : 5 * 60_000; // 5 minutes for unauthenticated users
+
+        const expiresAt = new Date(Date.now() + msTillExpiry).toISOString();
 
         const passwordHash = parsed.data.password
           ? createHash("sha256").update(parsed.data.password).digest("hex")
@@ -87,7 +95,7 @@ export const Route = createFileRoute("/api/public/v1/uploads/init")({
                 contentType: parsed.data.contentType ?? null,
                 passwordHash,
                 claimCode,
-                maxDownloads: parsed.data.maxDownloads ?? null,
+                maxDownloads: caller.userId ? (parsed.data.maxDownloads ?? null) : 1,
                 expiresAt: new Date(expiresAt),
               },
             });

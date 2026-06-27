@@ -67,18 +67,14 @@ function DropPage() {
           password: password || undefined,
         }),
       });
+      const j = await r.json();
       if (!r.ok) {
-        const j = await r.json();
         toast.error(j.message || j.error || "failed");
         return;
       }
-      const blob = await r.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = meta.data?.name || "download";
-      a.click();
-      URL.revokeObjectURL(url);
+      
+      // Standard browser download by redirecting to the presigned URL
+      window.location.href = j.url;
     } finally {
       setDownloading(false);
     }
@@ -159,7 +155,12 @@ function DropPage() {
         )}
 
         {!d.requiresClaim && (
-          <Button onClick={onDownload} disabled={downloading} size="lg" className="mt-6 w-full">
+          <Button 
+            onClick={onDownload} 
+            disabled={downloading} 
+            size="lg" 
+            className="mt-6 w-full bg-black text-white hover:bg-black/90 dark:bg-black dark:text-white dark:hover:bg-black/90"
+          >
             <Download className="mr-2 h-4 w-4" />
             {downloading ? "Preparing…" : "Download"}
           </Button>

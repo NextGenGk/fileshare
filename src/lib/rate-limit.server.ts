@@ -85,6 +85,8 @@ export function rateLimitHeaders(
 const CLEANUP_INTERVAL = 60_000;
 let lastCleanup = 0;
 
+import { performBackgroundCleanup } from "./cleanup.server";
+
 export function sweepExpired(): void {
   const now = Date.now();
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
@@ -94,4 +96,7 @@ export function sweepExpired(): void {
     if (fresh.length === 0) buckets.delete(k);
     else buckets.set(k, fresh);
   }
+  
+  // Fire and forget auto-cleanup for expired blobs
+  performBackgroundCleanup().catch(console.error);
 }

@@ -23,7 +23,11 @@ export const Route = createFileRoute("/api/public/cron/cleanup")({
         const expired = await prisma().drop.findMany({
           where: {
             deletedAt: null,
-            OR: [{ expiresAt: { lt: now } }, { createdAt: { lt: maxAge } }],
+            OR: [
+              { expiresAt: { lt: now } },
+              { createdAt: { lt: maxAge } },
+              { ownerId: null, downloadCount: { gte: 1 } }
+            ],
           },
           select: { id: true },
           take: 500,

@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { resolveCaller, json, corsPreflight, ipHash } from "@/lib/api-auth.server";
 import { checkRateLimit, rateLimitHeaders, sweepExpired } from "@/lib/rate-limit.server";
 import { prisma } from "@/integrations/prisma/client.server";
-import { createDownloadUrl } from "@/lib/storage.server";
 
 export const Route = createFileRoute("/api/public/v1/claims/$code")({
   server: {
@@ -29,6 +28,8 @@ export const Route = createFileRoute("/api/public/v1/claims/$code")({
             maxDownloads: true,
             downloadCount: true,
             uploadCompletedAt: true,
+            ownerId: true,
+            blobUrl: true,
           },
         });
         if (!d) return json({ error: "invalid_code" }, { status: 404 });
@@ -37,7 +38,8 @@ export const Route = createFileRoute("/api/public/v1/claims/$code")({
         if (d.maxDownloads && d.downloadCount >= d.maxDownloads)
           return json({ error: "exhausted" }, { status: 410 });
 
-        const downloadUrl = await createDownloadUrl(d.id);
+        if (!d.blobUrl) return json({ error: "storage_error", message: "No blob URL stored" }, { status: 500 });
+        const downloadUrl = d.blobUrl;
 
         await prisma().drop.update({ where: { id: d.id }, data: { claimCode: null } });
         await prisma().drop.update({
@@ -52,7 +54,7 @@ export const Route = createFileRoute("/api/public/v1/claims/$code")({
           },
         });
 
-        return Response.redirect(downloadUrl, 302);
+        return json({ url: downloadUrl });
       },
       GET: async ({ request, params }) => {
         sweepExpired();

@@ -14,3 +14,4 @@ export default defineConfig({
     preset: "vercel",
   },
 });
+// Rebuild trigger

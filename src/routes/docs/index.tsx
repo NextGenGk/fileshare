@@ -82,8 +82,9 @@ function DocsOverview() {
           API: expiry controls, password, and max downloads.
         </p>
         <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-          <li>The homepage offers a custom expiry up to 30 days.</li>
-          <li>Files upload via the direct upload flow through the API.</li>
+          <li>The homepage offers a custom expiry up to 30 days for signed-in users.</li>
+          <li>Guest (unauthenticated) uploads are automatically set to expire in <strong>5 minutes</strong>.</li>
+          <li>Files upload via the direct upload flow through the API, stored in Vercel Blob.</li>
           <li>
             Successful uploads return a short share URL in the form <code>/d/&lt;slug&gt;</code>.
           </li>
@@ -129,7 +130,7 @@ function DocsOverview() {
               </tr>
               <tr>
                 <td className="px-5 py-3 text-foreground/90">Durations</td>
-                <td className="px-5 py-3">1h, 24h, 3d, 7d (or custom expiry up to 30 days)</td>
+                <td className="px-5 py-3">Guest uploads expire in <strong>5 minutes</strong>; signed-in users get 1h, 24h, 3d, 7d or a custom expiry up to 30 days</td>
               </tr>
               <tr>
                 <td className="px-5 py-3 text-foreground/90">Max downloads</td>
@@ -137,7 +138,7 @@ function DocsOverview() {
               </tr>
               <tr>
                 <td className="px-5 py-3 text-foreground/90">Storage</td>
-                <td className="px-5 py-3">Files stored in the database (PostgreSQL BYTEA)</td>
+                <td className="px-5 py-3">File data stored in Vercel Blob; metadata in PostgreSQL (Neon)</td>
               </tr>
               <tr>
                 <td className="px-5 py-3 text-foreground/90">Authentication</td>

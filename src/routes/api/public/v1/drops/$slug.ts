@@ -3,7 +3,6 @@ import { createHash } from "node:crypto";
 import { resolveCaller, json, corsPreflight, ipHash } from "@/lib/api-auth.server";
 import { checkRateLimit, rateLimitHeaders, sweepExpired } from "@/lib/rate-limit.server";
 import { prisma } from "@/integrations/prisma/client.server";
-import { deleteFile, createDownloadUrl } from "@/lib/storage.server";
 
 export const Route = createFileRoute("/api/public/v1/drops/$slug")({
   server: {
@@ -37,6 +36,8 @@ export const Route = createFileRoute("/api/public/v1/drops/$slug")({
             claimCode: true,
             uploadCompletedAt: true,
             contentType: true,
+            ownerId: true,
+            blobUrl: true,
           },
         });
         if (!d) return json({ error: "not_found" }, { status: 404 });
@@ -51,12 +52,8 @@ export const Route = createFileRoute("/api/public/v1/drops/$slug")({
           if (hash !== d.passwordHash) return json({ error: "bad_password" }, { status: 401 });
         }
 
-        let downloadUrl: string;
-        try {
-          downloadUrl = await createDownloadUrl(d.id);
-        } catch (err) {
-          return json({ error: "storage_error", message: String(err) }, { status: 500 });
-        }
+        if (!d.blobUrl) return json({ error: "storage_error", message: "No blob URL stored" }, { status: 500 });
+        const downloadUrl = d.blobUrl;
 
         await prisma().drop.update({
           where: { id: d.id },
@@ -70,7 +67,7 @@ export const Route = createFileRoute("/api/public/v1/drops/$slug")({
           },
         });
 
-        return Response.redirect(downloadUrl, 302);
+        return json({ url: downloadUrl });
       },
       GET: async ({ request, params }) => {
         sweepExpired();

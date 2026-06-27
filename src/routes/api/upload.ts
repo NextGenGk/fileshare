@@ -13,6 +13,7 @@ import {
   SLUG_LENGTH,
 } from "@/lib/constants";
 import { prisma } from "@/integrations/prisma/client.server";
+import { put } from "@vercel/blob";
 
 const slugify = customAlphabet(SLUG_ALPHABET, SLUG_LENGTH);
 
@@ -54,6 +55,11 @@ export const Route = createFileRoute("/api/upload")({
           );
         }
 
+        const isWebClient = request.headers.get("x-fileshare-web") === "true";
+        if (!caller.userId && !isWebClient) {
+          return json({ error: "unauthorized", message: "API key is required for API and CLI uploads." }, { status: 401 });
+        }
+
         let form: FormData;
         try {
           form = await request.formData();
@@ -69,12 +75,6 @@ export const Route = createFileRoute("/api/upload")({
         const buf = await fileField.arrayBuffer();
         if (buf.byteLength > MAX_FILE_BYTES) {
           return json({ error: "file_too_large" }, { status: 413 });
-        }
-        if (buf.byteLength > 4 * 1024 * 1024) {
-          return json(
-            { error: "use_web_ui", message: "Files over 4 MB must use the web UI upload flow" },
-            { status: 413 },
-          );
         }
 
         const durationRaw = form.get("duration");
@@ -103,9 +103,27 @@ export const Route = createFileRoute("/api/upload")({
 
         const slug = slugify();
         const id = crypto.randomUUID();
-        const expiresAt = new Date(Date.now() + expiresInDays * 86400_000);
+
+        const isAuth = !!caller.userId;
+        const msTillExpiry = isAuth
+          ? expiresInDays * 86400_000
+          : 5 * 60_000; // 5 minutes for unauthenticated
+        const expiresAt = new Date(Date.now() + msTillExpiry);
 
         const passwordHash = password ? createHash("sha256").update(password).digest("hex") : null;
+
+        // Upload to Vercel Blob
+        let blobUrl: string;
+        try {
+          const blob = await put(`drops/${id}`, new Blob([buf], { type: fileField.type || "application/octet-stream" }), {
+            access: "public",
+            contentType: fileField.type || "application/octet-stream",
+            token: process.env.BLOB_READ_WRITE_TOKEN,
+          });
+          blobUrl = blob.url;
+        } catch (e) {
+          return json({ error: "blob_error", message: String(e) }, { status: 500 });
+        }
 
         for (let attempt = 0; attempt < 3; attempt++) {
           try {
@@ -121,6 +139,7 @@ export const Route = createFileRoute("/api/upload")({
                 maxDownloads: maxDownloads ?? null,
                 expiresAt,
                 uploadCompletedAt: new Date(),
+                blobUrl,
               },
             });
             break;

@@ -38,7 +38,15 @@ auth_header() {
 cmd_send() {
   FILE="${1:-}"; shift || true
   [ -n "$FILE" ] || { echo "usage: fileshare send <file> [--duration 24h] [--max-downloads N] [--password X]" >&2; exit 2; }
-  [ -f "$FILE" ] || { echo "fileshare: file not found: $FILE" >&2; exit 1; }
+  [ -e "$FILE" ] || { echo "fileshare: file not found: $FILE" >&2; exit 1; }
+
+  if [ -d "$FILE" ]; then
+    NAME=$(basename "$FILE")
+    echo "→ bundling folder $NAME..." >&2
+    TEMP_TAR="${TMPDIR:-/tmp}/$NAME.tar.gz"
+    tar -czf "$TEMP_TAR" -C "$(dirname "$FILE")" "$NAME"
+    FILE="$TEMP_TAR"
+  fi
 
   DURATION="24h"; MAX_DL=""; PASSWORD=""
   while [ $# -gt 0 ]; do
@@ -97,10 +105,15 @@ cmd_get() {
   BODY='{}'
   [ -n "$PASSWORD" ] && BODY=$(printf '{"password":"%s"}' "$PASSWORD")
 
+  # Get the blob download URL from the API
+  DL_JSON=$(curl -fsS -X POST -H "Content-Type: application/json" \
+    --data "$BODY" "$API_URL/api/files/$SLUG")
+  DL_URL=$(printf '%s' "$DL_JSON" | pyjson url)
+  [ -n "$DL_URL" ] || { echo "fileshare: server returned no download URL" >&2; exit 1; }
+
   echo "→ downloading $NAME → $OUT" >&2
-  curl -fSL --progress-bar -X POST -H "Content-Type: application/json" \
-    --data "$BODY" "$API_URL/api/files/$SLUG/download" \
-    -o "$OUT"
+  # Stream directly from Vercel Blob
+  curl -fSL --progress-bar "$DL_URL" -o "$OUT"
   echo "$OUT"
 }
 

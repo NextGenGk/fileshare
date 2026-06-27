@@ -1,9 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Copy, Trash2, KeyRound, LogOut, Clock, AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — FileShare" }] }),
@@ -98,13 +109,15 @@ function Dashboard() {
     },
   });
 
+  const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
+
   const remove = async (slug: string) => {
-    if (!confirm(`Delete ${slug}?`)) return;
     const r = await authedFetch(getToken, `/api/public/v1/drops/${slug}`, { method: "DELETE" });
     if (r.ok) {
       toast.success("Deleted.");
       qc.invalidateQueries({ queryKey: ["my-drops"] });
     } else toast.error("Delete failed");
+    setDeleteSlug(null);
   };
 
   const copy = (url: string) => {
@@ -219,7 +232,7 @@ function Dashboard() {
                     >
                       <Copy className="h-3.5 w-3.5" />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => remove(d.slug)}>
+                    <Button size="sm" variant="ghost" onClick={() => setDeleteSlug(d.slug)}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   </td>

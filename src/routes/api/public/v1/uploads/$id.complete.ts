@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { resolveCaller, json, corsPreflight } from "@/lib/api-auth.server";
 import { checkRateLimit, rateLimitHeaders, sweepExpired } from "@/lib/rate-limit.server";
 import { prisma } from "@/integrations/prisma/client.server";
-import { fileExists, fileSize } from "@/lib/storage.server";
 
 export const Route = createFileRoute("/api/public/v1/uploads/$id/complete")({
   server: {
@@ -19,6 +18,12 @@ export const Route = createFileRoute("/api/public/v1/uploads/$id/complete")({
           );
         }
 
+        let blobUrl: string | undefined;
+        try {
+          const body = await request.json();
+          blobUrl = typeof body?.blobUrl === "string" ? body.blobUrl : undefined;
+        } catch { /* optional body */ }
+
         const drop = await prisma().drop.findUnique({
           where: { id: params.id },
           select: { id: true, slug: true, ownerId: true, expiresAt: true },
@@ -27,13 +32,13 @@ export const Route = createFileRoute("/api/public/v1/uploads/$id/complete")({
         if (drop.ownerId && drop.ownerId !== caller.userId)
           return json({ error: "forbidden" }, { status: 403 });
 
-        const exists = await fileExists(drop.id);
-        if (!exists) return json({ error: "upload_missing" }, { status: 400 });
+        if (!blobUrl) {
+          return json({ error: "blob_url_missing" }, { status: 400 });
+        }
 
-        const realSize = await fileSize(drop.id);
         await prisma().drop.update({
           where: { id: drop.id },
-          data: { uploadCompletedAt: new Date(), sizeBytes: realSize },
+          data: { uploadCompletedAt: new Date(), blobUrl },
         });
 
         const origin = new URL(request.url).origin;

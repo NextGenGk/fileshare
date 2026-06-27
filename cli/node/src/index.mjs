@@ -15,7 +15,8 @@ import {
   existsSync,
 } from "node:fs";
 import { basename, join, dirname } from "node:path";
-import { homedir } from "node:os";
+import { homedir, tmpdir } from "node:os";
+import { execSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 
 const DEFAULT_API = "http://localhost:8080";
@@ -119,8 +120,19 @@ async function uploadFile(filePath, options) {
   if (!existsSync(filePath)) {
     throw new Error(`file not found: ${filePath}`);
   }
-  const stat = statSync(filePath);
-  const name = basename(filePath);
+  let stat = statSync(filePath);
+  let name = basename(filePath);
+
+  if (stat.isDirectory()) {
+    process.stderr.write(`\u2192 bundling folder ${name}...\n`);
+    const tarName = `${name}.tar.gz`;
+    const tempTar = join(tmpdir(), tarName);
+    // Use system tar which is built into Mac, Linux, and Windows 10+
+    execSync(`tar -czf "${tempTar}" -C "${dirname(filePath)}" "${basename(filePath)}"`);
+    filePath = tempTar;
+    stat = statSync(filePath);
+    name = tarName;
+  }
   const contentType = "application/octet-stream";
 
   const duration = options.duration || (options["expires-at"] ? undefined : "24h");
@@ -193,7 +205,7 @@ async function cmdSend(args) {
   const file = getFlag(flags, ["file"]) || positional[0];
   if (!file) {
     throw new Error(
-      "usage: fileshare send <file> [--duration 24h] [--expires-at ISO] [--password X] [--max-downloads N] [--email X]",
+      "usage: fileshare send <file|folder> [--duration 24h] [--expires-at ISO] [--password X] [--max-downloads N] [--email X]",
     );
   }
 
@@ -216,15 +228,19 @@ async function cmdGet(args) {
   const out = flags.out || meta.filename;
   process.stderr.write(`\u2192 ${meta.filename} \u2192 ${out}\n`);
 
-  // Download via the files API
-  const dlRes = await fetch(`${API}/api/files/${slug}/download`, {
+  // Get the download URL (POST returns {url: blobUrl})
+  const dlJson = await api(`/api/files/${slug}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: flags.password ? JSON.stringify({ password: flags.password }) : "{}",
+    body: flags.password ? { password: flags.password } : {},
   });
-  if (!dlRes.ok || !dlRes.body) {
-    const errText = await dlRes.text().catch(() => "");
-    throw new Error(`download failed: ${dlRes.status} ${errText}`);
+
+  if (!dlJson.url) throw new Error("server returned no download URL");
+
+  // Stream the file from Vercel Blob directly
+  const blobRes = await fetch(dlJson.url);
+  if (!blobRes.ok || !blobRes.body) {
+    throw new Error(`blob fetch failed: ${blobRes.status}`);
   }
 
   mkdirSync(dirname(out) || ".", { recursive: true });
@@ -232,7 +248,7 @@ async function cmdGet(args) {
   const { pipeline } = await import("node:stream/promises");
   const { Readable } = await import("node:stream");
   const ws = createWriteStream(out);
-  await pipeline(Readable.fromWeb(dlRes.body), ws);
+  await pipeline(Readable.fromWeb(blobRes.body), ws);
   console.log(out);
 }
 
@@ -331,15 +347,15 @@ Usage:
                         [--max-downloads N] [--email X] [--json]
 
 Commands:
-  fileshare send <file>   Upload a file
-  fileshare get  <slug>   Download a file
-  fileshare list          List your drops          (requires API key)
-  fileshare rm   <slug>   Delete a drop            (requires API key)
-  fileshare login         Save API key
-  fileshare config        Manage configuration
+  fileshare send <file|folder> Upload a file or folder
+  fileshare get  <slug>        Download a file
+  fileshare list               List your drops          (requires API key)
+  fileshare rm   <slug>        Delete a drop            (requires API key)
+  fileshare login              Save API key
+  fileshare config             Manage configuration
 
 Flags:
-  --file <path>          File to upload
+  --file <path>          File or folder to upload
   --duration <str>       Expiry: 1h, 24h, 3d, 7d  (default: 24h)
   --expires-at <iso>     Fixed expiry date (ISO 8601)
   --password <str>       Protect with password

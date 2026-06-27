@@ -94,13 +94,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Drop a file, share a link. Up to 500 MB, expires automatically. Web UI, REST API, and CLI.",
+          "Fast, simple, secure data transfer with full encryption. Upload files and share links instantly. No sign-up required. Burn-after-read options available.",
       },
       { name: "author", content: "FileShare" },
-      { property: "og:title", content: "FileShare — send big files, fast" },
+      { property: "og:title", content: "FileShare — Fast, Simple, Secure File Transfer" },
       {
         property: "og:description",
-        content: "Drop a file, share a link. Up to 500 MB, expires automatically.",
+        content: "Securely share files directly from your browser. Zero knowledge, fast uploads, and automatic expiry.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -161,14 +161,14 @@ function RootComponent() {
                   <Logo />
                 </Link>
                 <nav className="mono flex items-center gap-5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  <Link to="/docs" className="hover:text-foreground">
-                    Docs
+                  <Link to="/" className="hover:text-foreground">
+                    Send
                   </Link>
                   <Link to="/receive" className="hover:text-foreground">
                     Receive
                   </Link>
                   <a
-                    href="https://github.com/anomalyco/fileshare"
+                    href="https://github.com/NextGenGk"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-foreground"
@@ -216,13 +216,6 @@ function SiteHeader() {
           >
             Receive
           </Link>
-          <Link
-            to="/docs"
-            activeProps={{ className: "text-foreground" }}
-            className="hover:text-foreground"
-          >
-            Docs
-          </Link>
           {isLoaded && isSignedIn && (
             <Link
               to="/dashboard"
@@ -238,9 +231,10 @@ function SiteHeader() {
           {isLoaded && isSignedIn ? (
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
+                await qc.cancelQueries();
                 qc.clear();
-                signOut();
+                await signOut();
                 window.location.href = "/auth";
               }}
               className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-accent mono uppercase tracking-widest cursor-pointer"
@@ -298,14 +292,7 @@ function SiteHeader() {
                   Receive
                 </Link>
               </SheetClose>
-              <SheetClose asChild>
-                <Link
-                  to="/docs"
-                  className="flex rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/10 transition"
-                >
-                  Docs
-                </Link>
-              </SheetClose>
+
               {isLoaded && isSignedIn && (
                 <SheetClose asChild>
                   <Link
@@ -321,9 +308,10 @@ function SiteHeader() {
               {isLoaded && isSignedIn ? (
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
+                    await qc.cancelQueries();
                     qc.clear();
-                    signOut();
+                    await signOut();
                     window.location.href = "/auth";
                   }}
                   className="flex w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2.5 text-xs font-medium text-foreground shadow-sm hover:bg-accent mono uppercase tracking-widest cursor-pointer transition"

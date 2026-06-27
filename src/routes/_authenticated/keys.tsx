@@ -6,6 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Copy, Trash2, Plus, ArrowLeft } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/keys")({
   head: () => ({ meta: [{ title: "API keys — FileShare" }] }),
@@ -65,13 +75,15 @@ function Keys() {
     qc.invalidateQueries({ queryKey: ["api-keys"] });
   };
 
+  const [revokeId, setRevokeId] = useState<string | null>(null);
+
   const revoke = async (id: string) => {
-    if (!confirm("Revoke this key?")) return;
     const r = await authedFetch(getToken, `/api/public/v1/me/keys/${id}`, { method: "DELETE" });
     if (r.ok) {
       toast.success("Revoked.");
       qc.invalidateQueries({ queryKey: ["api-keys"] });
     }
+    setRevokeId(null);
   };
 
   return (
@@ -156,7 +168,7 @@ function Keys() {
                 </td>
                 <td className="px-4 py-3 text-right">
                   {!k.revoked_at && (
-                    <Button size="sm" variant="ghost" onClick={() => revoke(k.id)}>
+                    <Button size="sm" variant="ghost" onClick={() => setRevokeId(k.id)}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   )}
@@ -166,6 +178,26 @@ function Keys() {
           </tbody>
         </table>
       </div>
+
+      <AlertDialog open={!!revokeId} onOpenChange={(o) => !o && setRevokeId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently revoke this API key. Any scripts using it will immediately fail.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => revokeId && revoke(revokeId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Revoke
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

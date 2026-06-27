@@ -79,7 +79,12 @@ export const Route = createFileRoute("/api/uploads/")({
 
         const slug = slugify();
         const id = crypto.randomUUID();
-        const expiresAt = new Date(Date.now() + expiresInDays * 86400_000);
+        const isAuth = !!caller.userId;
+        const msTillExpiry = isAuth
+          ? expiresInDays * 86400_000
+          : 5 * 60_000; // 5 minutes for unauthenticated users
+
+        const expiresAt = new Date(Date.now() + msTillExpiry);
 
         const deliveryMode = password ? "password" : "link";
         const passwordHash = password ? createHash("sha256").update(password).digest("hex") : null;

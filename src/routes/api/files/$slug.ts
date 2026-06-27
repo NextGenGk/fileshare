@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { resolveCaller, json, corsPreflight, ipHash } from "@/lib/api-auth.server";
 import { checkRateLimit, rateLimitHeaders, sweepExpired } from "@/lib/rate-limit.server";
 import { prisma } from "@/integrations/prisma/client.server";
-import { deleteFile, createDownloadUrl } from "@/lib/storage.server";
+import { deleteFile } from "@/lib/storage.server";
 
 export const Route = createFileRoute("/api/files/$slug")({
   server: {
@@ -38,6 +38,8 @@ export const Route = createFileRoute("/api/files/$slug")({
             claimCode: true,
             uploadCompletedAt: true,
             contentType: true,
+            ownerId: true,
+            blobUrl: true,
           },
         });
         if (!d) return json({ error: "not_found" }, { status: 404 });
@@ -52,7 +54,8 @@ export const Route = createFileRoute("/api/files/$slug")({
           if (hash !== d.passwordHash) return json({ error: "bad_password" }, { status: 401 });
         }
 
-        const downloadUrl = await createDownloadUrl(d.id);
+        if (!d.blobUrl) return json({ error: "storage_error", message: "No blob URL stored" }, { status: 500 });
+        const downloadUrl = d.blobUrl;
 
         await prisma().drop.update({
           where: { id: d.id },
@@ -66,7 +69,7 @@ export const Route = createFileRoute("/api/files/$slug")({
           },
         });
 
-        return Response.redirect(downloadUrl, 302);
+        return json({ url: downloadUrl });
       },
       GET: async ({ request, params }) => {
         sweepExpired();

@@ -17,3 +17,6 @@ export function prisma(): PrismaClient {
   if (!_prisma) _prisma = createPrisma();
   return _prisma;
 }
+
+// Triggering HMR reload so Vite reads the clean file!
+// Cache invalidated for data column removal

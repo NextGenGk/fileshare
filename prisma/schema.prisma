@@ -33,7 +33,6 @@ model Drop {
   originalName      String    @map("original_name")
   sizeBytes         Int       @default(0) @map("size_bytes")
   contentType       String?   @map("content_type")
-  data              Bytes?
   passwordHash      String?   @map("password_hash")
   claimCode         String?   @unique @map("claim_code")
   maxDownloads      Int?      @map("max_downloads")
@@ -42,6 +41,7 @@ model Drop {
   createdAt         DateTime  @default(now()) @map("created_at")
   deletedAt         DateTime? @map("deleted_at")
   uploadCompletedAt DateTime? @map("upload_completed_at")
+  blobUrl           String?   @map("blob_url")
 
   events DownloadEvent[]
 
