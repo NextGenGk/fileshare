@@ -18,14 +18,16 @@ jobs:
 
       - run: npm ci
 
+      - run: echo "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > .env
+
       - run: npm run build
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: .output/server
           preCommands: |
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-            echo "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" >> .env
-            echo "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" >> .env
-          command: deploy --outdir .output/server
+            echo "${{ secrets.DATABASE_URL }}" | wrangler secret put DATABASE_URL
+            echo "${{ secrets.CLERK_SECRET_KEY }}" | wrangler secret put CLERK_SECRET_KEY
+          command: deploy
