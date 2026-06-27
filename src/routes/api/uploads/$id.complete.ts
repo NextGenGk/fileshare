@@ -27,11 +27,7 @@ export const Route = createFileRoute("/api/uploads/$id/complete")({
         if (drop.ownerId && drop.ownerId !== caller.userId)
           return json({ error: "forbidden" }, { status: 403 });
 
-        let exists = await fileExists(drop.id);
-        if (!exists) {
-          await new Promise((r) => setTimeout(r, 600));
-          exists = await fileExists(drop.id);
-        }
+        const exists = await fileExists(drop.id);
         if (!exists) return json({ error: "upload_missing" }, { status: 400 });
 
         const realSize = await fileSize(drop.id);
@@ -41,13 +37,15 @@ export const Route = createFileRoute("/api/uploads/$id/complete")({
         });
 
         const origin = new URL(request.url).origin;
-        return json({
-          ...rateLimitHeaders("upload", rl.remaining, rl.reset),
-          id: drop.id,
-          slug: drop.slug,
-          shareUrl: `${origin}/d/${drop.slug}`,
-          expiresAt: drop.expiresAt,
-        });
+        return json(
+          {
+            id: drop.id,
+            slug: drop.slug,
+            shareUrl: `${origin}/d/${drop.slug}`,
+            expiresAt: drop.expiresAt,
+          },
+          { headers: rateLimitHeaders("upload", rl.remaining, rl.reset) },
+        );
       },
     },
   },

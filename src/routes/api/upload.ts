@@ -121,7 +121,6 @@ export const Route = createFileRoute("/api/upload")({
                 maxDownloads: maxDownloads ?? null,
                 expiresAt,
                 uploadCompletedAt: new Date(),
-                data: Buffer.from(buf),
               },
             });
             break;
@@ -138,17 +137,19 @@ export const Route = createFileRoute("/api/upload")({
         }
 
         const origin = new URL(request.url).origin;
-        return json({
-          id: slug,
-          ...rateLimitHeaders("upload", rl.remaining, rl.reset),
-          url: `${origin}/d/${slug}`,
-          expires: expiresAt.toISOString(),
-          downloads: 0,
-          maxDownloads: maxDownloads ?? null,
-          passwordRequired: !!password,
-          filename: fileField.name,
-          size: buf.byteLength,
-        });
+        return json(
+          {
+            id: slug,
+            url: `${origin}/d/${slug}`,
+            expires: expiresAt.toISOString(),
+            downloads: 0,
+            maxDownloads: maxDownloads ?? null,
+            passwordRequired: !!password,
+            filename: fileField.name,
+            size: buf.byteLength,
+          },
+          { headers: rateLimitHeaders("upload", rl.remaining, rl.reset) },
+        );
       },
     },
   },

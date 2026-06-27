@@ -1,46 +1,25 @@
-import { issueSignedToken, presignUrl, head, del, BlobNotFoundError } from "@vercel/blob";
+import { generateClientTokenFromReadWriteToken } from "@vercel/blob/client";
+import { head, del, BlobNotFoundError } from "@vercel/blob";
 
 const pn = (dropId: string) => `drops/${dropId}`;
 
-function blobToken(): string {
-  const t = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!t) throw new Error("BLOB_READ_WRITE_TOKEN not set");
-  return t;
-}
-
-function storeId(): string {
-  const parts = blobToken().split("_");
-  const sid = parts.length >= 4 ? parts[3] : parts[parts.length - 1];
-  return sid.startsWith("store_") ? sid.slice(6) : sid;
-}
-
-function cdnUrl(dropId: string): string {
-  return `https://${storeId()}.public.blob.vercel-storage.com/${pn(dropId)}`;
-}
-
-export async function createUploadUrl(
+export async function createUploadToken(
   dropId: string,
   contentType: string,
   size: number,
 ): Promise<string> {
-  const token = await issueSignedToken({
+  return generateClientTokenFromReadWriteToken({
     pathname: pn(dropId),
-    operations: ["put"],
-    maximumSizeInBytes: size,
     allowedContentTypes: [contentType],
+    maximumSizeInBytes: size,
+    addRandomSuffix: false,
+    allowOverwrite: false,
     validUntil: Date.now() + 2 * 60 * 60 * 1000,
   });
-  const { presignedUrl } = await presignUrl(token, {
-    operation: "put",
-    pathname: pn(dropId),
-    access: "public",
-    maximumSizeInBytes: size,
-    allowedContentTypes: [contentType],
-  });
-  return presignedUrl;
 }
 
 export async function createDownloadUrl(dropId: string): Promise<string> {
+  const { issueSignedToken, presignUrl } = await import("@vercel/blob");
   const token = await issueSignedToken({
     pathname: pn(dropId),
     operations: ["get"],
@@ -63,15 +42,7 @@ export async function deleteFile(dropId: string) {
 }
 
 async function headFallback(dropId: string): Promise<{ size: number } | null> {
-  try {
-    const url = cdnUrl(dropId);
-    const res = await fetch(url, { method: "HEAD" });
-    if (!res.ok) return null;
-    const size = parseInt(res.headers.get("content-length") || "0", 10);
-    return { size };
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 export async function fileExists(dropId: string): Promise<boolean> {

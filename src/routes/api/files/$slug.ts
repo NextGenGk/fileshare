@@ -99,19 +99,21 @@ export const Route = createFileRoute("/api/files/$slug")({
         const remainingDownloads = d.maxDownloads
           ? Math.max(0, d.maxDownloads - d.downloadCount)
           : null;
-        return json({
-          ...rateLimitHeaders("metadata", rl.remaining, rl.reset),
-          id: d.slug,
-          filename: d.originalName,
-          size: d.sizeBytes,
-          contentType: d.contentType,
-          expires: d.expiresAt,
-          passwordRequired: !!d.passwordHash,
-          downloads: d.downloadCount,
-          maxDownloads: d.maxDownloads,
-          remainingDownloads,
-          expired,
-        });
+        return json(
+          {
+            id: d.slug,
+            filename: d.originalName,
+            size: d.sizeBytes,
+            contentType: d.contentType,
+            expires: d.expiresAt,
+            passwordRequired: !!d.passwordHash,
+            downloads: d.downloadCount,
+            maxDownloads: d.maxDownloads,
+            remainingDownloads,
+            expired,
+          },
+          { headers: rateLimitHeaders("metadata", rl.remaining, rl.reset) },
+        );
       },
       DELETE: async ({ request, params }) => {
         sweepExpired();
@@ -132,7 +134,10 @@ export const Route = createFileRoute("/api/files/$slug")({
         if (d.ownerId !== caller.userId) return json({ error: "forbidden" }, { status: 403 });
         await deleteFile(d.id);
         await prisma().drop.update({ where: { id: d.id }, data: { deletedAt: new Date() } });
-        return json({ ok: true, ...rateLimitHeaders("management", rl.remaining, rl.reset) });
+        return json(
+          { ok: true },
+          { headers: rateLimitHeaders("management", rl.remaining, rl.reset) },
+        );
       },
     },
   },

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { put } from "@vercel/blob/client";
 
 import {
   Upload,
@@ -107,19 +108,13 @@ function Index() {
         const result = await init.json();
         if (!init.ok) throw new Error(result.message || result.error || "init failed");
 
-        await new Promise<void>((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open("PUT", result.uploadUrl);
-          xhr.setRequestHeader("Content-Type", f.type || "application/octet-stream");
-          xhr.upload.onprogress = (e) =>
-            e.lengthComputable && setProgress((e.loaded / e.total) * 100);
-          xhr.onload = () =>
-            xhr.status >= 200 && xhr.status < 300
-              ? resolve()
-              : reject(new Error(`upload ${xhr.status}`));
-          xhr.onerror = () => reject(new Error("network error"));
-          xhr.send(f);
+        await put(`drops/${result.id}`, f, {
+          access: "public",
+          token: result.uploadToken,
+          contentType: f.type || "application/octet-stream",
+          multipart: true,
         });
+        setProgress(100);
 
         const doneRes = await fetch(`/api/public/v1/uploads/${result.id}/complete`, {
           method: "POST",
@@ -190,18 +185,14 @@ function Index() {
         const result = await init.json();
         if (!init.ok) throw new Error(result.message || result.error || "init failed");
 
-        await new Promise<void>((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open("PUT", result.uploadUrl);
-          xhr.setRequestHeader("Content-Type", "application/zip");
-          xhr.upload.onprogress = (e) =>
-            e.lengthComputable && setProgress((e.loaded / e.total) * 100);
-          xhr.onload = () =>
-            xhr.status >= 200 && xhr.status < 300
-              ? resolve()
-              : reject(new Error(`upload ${xhr.status}`));
-          xhr.onerror = () => reject(new Error("network error"));
-          xhr.send(blob);
+        await put(`drops/${result.id}`, blob, {
+          access: "public",
+          token: result.uploadToken,
+          contentType: "application/zip",
+          multipart: totalSize > 5 * 1024 * 1024,
+          onUploadProgress: ({ percentage }) => {
+            setProgress(percentage);
+          },
         });
 
         const doneRes = await fetch(`/api/public/v1/uploads/${result.id}/complete`, {

@@ -25,7 +25,6 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as ApiUploadsIndexRouteImport } from './routes/api/uploads/index'
 import { Route as ApiFilesSlugRouteImport } from './routes/api/files/$slug'
 import { Route as ApiCliConfigRouteImport } from './routes/api/cli/config'
-import { Route as ApiUploadsIdFileRouteImport } from './routes/api/uploads/$id.file'
 import { Route as ApiUploadsIdCompleteRouteImport } from './routes/api/uploads/$id.complete'
 import { Route as ApiPublicV1QrRouteImport } from './routes/api/public/v1/qr'
 import { Route as ApiPublicCronCleanupRouteImport } from './routes/api/public/cron/cleanup'
@@ -34,7 +33,6 @@ import { Route as ApiPublicV1MeKeysRouteImport } from './routes/api/public/v1/me
 import { Route as ApiPublicV1MeDropsRouteImport } from './routes/api/public/v1/me/drops'
 import { Route as ApiPublicV1DropsSlugRouteImport } from './routes/api/public/v1/drops/$slug'
 import { Route as ApiPublicV1ClaimsCodeRouteImport } from './routes/api/public/v1/claims/$code'
-import { Route as ApiPublicV1UploadsIdFileRouteImport } from './routes/api/public/v1/uploads/$id.file'
 import { Route as ApiPublicV1UploadsIdCompleteRouteImport } from './routes/api/public/v1/uploads/$id.complete'
 import { Route as ApiPublicV1MeKeysIdRouteImport } from './routes/api/public/v1/me/keys.$id'
 
@@ -117,11 +115,6 @@ const ApiCliConfigRoute = ApiCliConfigRouteImport.update({
   path: '/api/cli/config',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiUploadsIdFileRoute = ApiUploadsIdFileRouteImport.update({
-  id: '/api/uploads/$id/file',
-  path: '/api/uploads/$id/file',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiUploadsIdCompleteRoute = ApiUploadsIdCompleteRouteImport.update({
   id: '/api/uploads/$id/complete',
   path: '/api/uploads/$id/complete',
@@ -162,12 +155,6 @@ const ApiPublicV1ClaimsCodeRoute = ApiPublicV1ClaimsCodeRouteImport.update({
   path: '/api/public/v1/claims/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicV1UploadsIdFileRoute =
-  ApiPublicV1UploadsIdFileRouteImport.update({
-    id: '/api/public/v1/uploads/$id/file',
-    path: '/api/public/v1/uploads/$id/file',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicV1UploadsIdCompleteRoute =
   ApiPublicV1UploadsIdCompleteRouteImport.update({
     id: '/api/public/v1/uploads/$id/complete',
@@ -199,7 +186,6 @@ export interface FileRoutesByFullPath {
   '/api/public/cron/cleanup': typeof ApiPublicCronCleanupRoute
   '/api/public/v1/qr': typeof ApiPublicV1QrRoute
   '/api/uploads/$id/complete': typeof ApiUploadsIdCompleteRoute
-  '/api/uploads/$id/file': typeof ApiUploadsIdFileRoute
   '/api/public/v1/claims/$code': typeof ApiPublicV1ClaimsCodeRoute
   '/api/public/v1/drops/$slug': typeof ApiPublicV1DropsSlugRoute
   '/api/public/v1/me/drops': typeof ApiPublicV1MeDropsRoute
@@ -207,7 +193,6 @@ export interface FileRoutesByFullPath {
   '/api/public/v1/uploads/init': typeof ApiPublicV1UploadsInitRoute
   '/api/public/v1/me/keys/$id': typeof ApiPublicV1MeKeysIdRoute
   '/api/public/v1/uploads/$id/complete': typeof ApiPublicV1UploadsIdCompleteRoute
-  '/api/public/v1/uploads/$id/file': typeof ApiPublicV1UploadsIdFileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -228,7 +213,6 @@ export interface FileRoutesByTo {
   '/api/public/cron/cleanup': typeof ApiPublicCronCleanupRoute
   '/api/public/v1/qr': typeof ApiPublicV1QrRoute
   '/api/uploads/$id/complete': typeof ApiUploadsIdCompleteRoute
-  '/api/uploads/$id/file': typeof ApiUploadsIdFileRoute
   '/api/public/v1/claims/$code': typeof ApiPublicV1ClaimsCodeRoute
   '/api/public/v1/drops/$slug': typeof ApiPublicV1DropsSlugRoute
   '/api/public/v1/me/drops': typeof ApiPublicV1MeDropsRoute
@@ -236,7 +220,6 @@ export interface FileRoutesByTo {
   '/api/public/v1/uploads/init': typeof ApiPublicV1UploadsInitRoute
   '/api/public/v1/me/keys/$id': typeof ApiPublicV1MeKeysIdRoute
   '/api/public/v1/uploads/$id/complete': typeof ApiPublicV1UploadsIdCompleteRoute
-  '/api/public/v1/uploads/$id/file': typeof ApiPublicV1UploadsIdFileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -259,7 +242,6 @@ export interface FileRoutesById {
   '/api/public/cron/cleanup': typeof ApiPublicCronCleanupRoute
   '/api/public/v1/qr': typeof ApiPublicV1QrRoute
   '/api/uploads/$id/complete': typeof ApiUploadsIdCompleteRoute
-  '/api/uploads/$id/file': typeof ApiUploadsIdFileRoute
   '/api/public/v1/claims/$code': typeof ApiPublicV1ClaimsCodeRoute
   '/api/public/v1/drops/$slug': typeof ApiPublicV1DropsSlugRoute
   '/api/public/v1/me/drops': typeof ApiPublicV1MeDropsRoute
@@ -267,7 +249,6 @@ export interface FileRoutesById {
   '/api/public/v1/uploads/init': typeof ApiPublicV1UploadsInitRoute
   '/api/public/v1/me/keys/$id': typeof ApiPublicV1MeKeysIdRoute
   '/api/public/v1/uploads/$id/complete': typeof ApiPublicV1UploadsIdCompleteRoute
-  '/api/public/v1/uploads/$id/file': typeof ApiPublicV1UploadsIdFileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -290,7 +271,6 @@ export interface FileRouteTypes {
     | '/api/public/cron/cleanup'
     | '/api/public/v1/qr'
     | '/api/uploads/$id/complete'
-    | '/api/uploads/$id/file'
     | '/api/public/v1/claims/$code'
     | '/api/public/v1/drops/$slug'
     | '/api/public/v1/me/drops'
@@ -298,7 +278,6 @@ export interface FileRouteTypes {
     | '/api/public/v1/uploads/init'
     | '/api/public/v1/me/keys/$id'
     | '/api/public/v1/uploads/$id/complete'
-    | '/api/public/v1/uploads/$id/file'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -319,7 +298,6 @@ export interface FileRouteTypes {
     | '/api/public/cron/cleanup'
     | '/api/public/v1/qr'
     | '/api/uploads/$id/complete'
-    | '/api/uploads/$id/file'
     | '/api/public/v1/claims/$code'
     | '/api/public/v1/drops/$slug'
     | '/api/public/v1/me/drops'
@@ -327,7 +305,6 @@ export interface FileRouteTypes {
     | '/api/public/v1/uploads/init'
     | '/api/public/v1/me/keys/$id'
     | '/api/public/v1/uploads/$id/complete'
-    | '/api/public/v1/uploads/$id/file'
   id:
     | '__root__'
     | '/'
@@ -349,7 +326,6 @@ export interface FileRouteTypes {
     | '/api/public/cron/cleanup'
     | '/api/public/v1/qr'
     | '/api/uploads/$id/complete'
-    | '/api/uploads/$id/file'
     | '/api/public/v1/claims/$code'
     | '/api/public/v1/drops/$slug'
     | '/api/public/v1/me/drops'
@@ -357,7 +333,6 @@ export interface FileRouteTypes {
     | '/api/public/v1/uploads/init'
     | '/api/public/v1/me/keys/$id'
     | '/api/public/v1/uploads/$id/complete'
-    | '/api/public/v1/uploads/$id/file'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -378,14 +353,12 @@ export interface RootRouteChildren {
   ApiPublicCronCleanupRoute: typeof ApiPublicCronCleanupRoute
   ApiPublicV1QrRoute: typeof ApiPublicV1QrRoute
   ApiUploadsIdCompleteRoute: typeof ApiUploadsIdCompleteRoute
-  ApiUploadsIdFileRoute: typeof ApiUploadsIdFileRoute
   ApiPublicV1ClaimsCodeRoute: typeof ApiPublicV1ClaimsCodeRoute
   ApiPublicV1DropsSlugRoute: typeof ApiPublicV1DropsSlugRoute
   ApiPublicV1MeDropsRoute: typeof ApiPublicV1MeDropsRoute
   ApiPublicV1MeKeysRoute: typeof ApiPublicV1MeKeysRouteWithChildren
   ApiPublicV1UploadsInitRoute: typeof ApiPublicV1UploadsInitRoute
   ApiPublicV1UploadsIdCompleteRoute: typeof ApiPublicV1UploadsIdCompleteRoute
-  ApiPublicV1UploadsIdFileRoute: typeof ApiPublicV1UploadsIdFileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -502,13 +475,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCliConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/uploads/$id/file': {
-      id: '/api/uploads/$id/file'
-      path: '/api/uploads/$id/file'
-      fullPath: '/api/uploads/$id/file'
-      preLoaderRoute: typeof ApiUploadsIdFileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/uploads/$id/complete': {
       id: '/api/uploads/$id/complete'
       path: '/api/uploads/$id/complete'
@@ -563,13 +529,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/v1/claims/$code'
       fullPath: '/api/public/v1/claims/$code'
       preLoaderRoute: typeof ApiPublicV1ClaimsCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/v1/uploads/$id/file': {
-      id: '/api/public/v1/uploads/$id/file'
-      path: '/api/public/v1/uploads/$id/file'
-      fullPath: '/api/public/v1/uploads/$id/file'
-      preLoaderRoute: typeof ApiPublicV1UploadsIdFileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/v1/uploads/$id/complete': {
@@ -631,14 +590,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCronCleanupRoute: ApiPublicCronCleanupRoute,
   ApiPublicV1QrRoute: ApiPublicV1QrRoute,
   ApiUploadsIdCompleteRoute: ApiUploadsIdCompleteRoute,
-  ApiUploadsIdFileRoute: ApiUploadsIdFileRoute,
   ApiPublicV1ClaimsCodeRoute: ApiPublicV1ClaimsCodeRoute,
   ApiPublicV1DropsSlugRoute: ApiPublicV1DropsSlugRoute,
   ApiPublicV1MeDropsRoute: ApiPublicV1MeDropsRoute,
   ApiPublicV1MeKeysRoute: ApiPublicV1MeKeysRouteWithChildren,
   ApiPublicV1UploadsInitRoute: ApiPublicV1UploadsInitRoute,
   ApiPublicV1UploadsIdCompleteRoute: ApiPublicV1UploadsIdCompleteRoute,
-  ApiPublicV1UploadsIdFileRoute: ApiPublicV1UploadsIdFileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

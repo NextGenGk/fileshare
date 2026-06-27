@@ -34,20 +34,22 @@ export const Route = createFileRoute("/api/public/v1/me/drops")({
           },
         });
         const origin = new URL(request.url).origin;
-        return json({
-          ...rateLimitHeaders("management", rl.remaining, rl.reset),
-          drops: rows.map((d) => ({
-            slug: d.slug,
-            name: d.originalName,
-            size: d.sizeBytes,
-            expiresAt: d.expiresAt,
-            downloads: d.downloadCount,
-            maxDownloads: d.maxDownloads,
-            createdAt: d.createdAt,
-            ready: !!d.uploadCompletedAt,
-            shareUrl: `${origin}/d/${d.slug}`,
-          })),
-        });
+        return json(
+          {
+            drops: rows.map((d) => ({
+              slug: d.slug,
+              name: d.originalName,
+              size: d.sizeBytes,
+              expiresAt: d.expiresAt,
+              downloads: d.downloadCount,
+              maxDownloads: d.maxDownloads,
+              createdAt: d.createdAt,
+              ready: !!d.uploadCompletedAt,
+              shareUrl: `${origin}/d/${d.slug}`,
+            })),
+          },
+          { headers: rateLimitHeaders("management", rl.remaining, rl.reset) },
+        );
       },
     },
   },

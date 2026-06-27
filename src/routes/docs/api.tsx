@@ -203,7 +203,7 @@ function DocsApi() {
       <Section id="direct-upload" title="Direct upload for larger files">
         <p>
           Larger files use a session-based direct upload flow. First create a session, then upload
-          the file to the provided URL, then finalize the upload.
+          the file using the returned token, then finalize the upload.
         </p>
 
         <div className="space-y-6">
@@ -224,11 +224,13 @@ function DocsApi() {
           </div>
 
           <div className="space-y-3">
-            <SubHeading>2. Upload file to returned uploadUrl</SubHeading>
-            <CodeBlock label="PUT uploadUrl">
-              {`curl -X PUT "$UPLOAD_URL" \\
-  -H "Content-Type: application/zip" \\
-  --data-binary "@./artifact.zip"`}
+            <SubHeading>2. Upload file using the upload token</SubHeading>
+            <CodeBlock label="Upload via @vercel/blob/client">
+              {`import { put } from "@vercel/blob/client";
+await put(uploadToken, file, {
+  access: "public",
+  multipart: true,
+});`}
             </CodeBlock>
           </div>
 
@@ -242,8 +244,8 @@ function DocsApi() {
 
         <p>
           The session creation response includes <code>uploadId</code>, <code>shareId</code>,{" "}
-          <code>url</code>, <code>expiresAt</code>, <code>uploadUrl</code>, and any headers required
-          for the direct upload request.
+          <code>url</code>, <code>expiresAt</code>, <code>uploadToken</code>, and any headers
+          required for the direct upload request.
         </p>
       </Section>
 
@@ -298,15 +300,15 @@ function DocsApi() {
   "slug": "a1c94e2f",
   "deliveryMode": "password",
   "claimCode": null,
-  "uploadUrl": "${origin}/api/public/v1/uploads/uuid-here/file",
+  "uploadToken": "vercel_blob_client_...",
   "shareUrl": "${origin}/d/a1c94e2f",
   "expiresAt": "2026-07-04T12:00:00.000Z"
 }`}
         </CodeBlock>
 
         <p>
-          After creating the session, upload the file to the <code>uploadUrl</code> with
-          <code>PUT</code> (same as the original direct upload flow), then finalize with
+          After creating the session, upload the file using the <code>uploadToken</code> with
+          <code>@vercel/blob/client</code>'s <code>put()</code>, then finalize with
           <code>POST /api/public/v1/uploads/:id/complete</code>.
         </p>
       </Section>

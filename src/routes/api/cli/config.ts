@@ -17,16 +17,18 @@ export const Route = createFileRoute("/api/cli/config")({
             { status: 429, headers: rateLimitHeaders("config", rl.remaining, rl.reset) },
           );
         }
-        return json({
-          ...rateLimitHeaders("config", rl.remaining, rl.reset),
-          maxExpiryDays: MAX_EXPIRY_DAYS,
-          maxFileBytes: MAX_FILE_BYTES,
-          defaultDuration: "24h",
-          durationOptions: ["1h", "24h", "3d", "7d"],
-          maxRecipients: 0,
-          inlineUpload: true,
-          directUpload: false,
-        });
+        return json(
+          {
+            maxExpiryDays: MAX_EXPIRY_DAYS,
+            maxFileBytes: MAX_FILE_BYTES,
+            defaultDuration: "24h",
+            durationOptions: ["1h", "24h", "3d", "7d"],
+            maxRecipients: 0,
+            inlineUpload: true,
+            directUpload: false,
+          },
+          { headers: rateLimitHeaders("config", rl.remaining, rl.reset) },
+        );
       },
     },
   },

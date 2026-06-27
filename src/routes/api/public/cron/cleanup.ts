@@ -29,7 +29,10 @@ export const Route = createFileRoute("/api/public/cron/cleanup")({
           take: 500,
         });
         if (!expired.length)
-          return json({ deleted: 0, ...rateLimitHeaders("config", rl.remaining, rl.reset) });
+          return json(
+            { deleted: 0 },
+            { headers: rateLimitHeaders("config", rl.remaining, rl.reset) },
+          );
         for (const d of expired) {
           await deleteFile(d.id);
         }
@@ -38,10 +41,12 @@ export const Route = createFileRoute("/api/public/cron/cleanup")({
           where: { id: { in: ids } },
           data: { deletedAt: now },
         });
-        return json({
-          deleted: expired.length,
-          ...rateLimitHeaders("config", rl.remaining, rl.reset),
-        });
+        return json(
+          {
+            deleted: expired.length,
+          },
+          { headers: rateLimitHeaders("config", rl.remaining, rl.reset) },
+        );
       },
     },
   },

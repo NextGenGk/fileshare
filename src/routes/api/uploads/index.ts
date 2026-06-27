@@ -13,7 +13,7 @@ import {
   SLUG_LENGTH,
 } from "@/lib/constants";
 import { prisma } from "@/integrations/prisma/client.server";
-import { createUploadUrl } from "@/lib/storage.server";
+import { createUploadToken } from "@/lib/storage.server";
 
 const slugify = customAlphabet(SLUG_ALPHABET, SLUG_LENGTH);
 
@@ -117,9 +117,13 @@ export const Route = createFileRoute("/api/uploads/")({
           }
         }
 
-        let uploadUrl: string;
+        let uploadToken: string;
         try {
-          uploadUrl = await createUploadUrl(id, contentType || "application/octet-stream", size);
+          uploadToken = await createUploadToken(
+            id,
+            contentType || "application/octet-stream",
+            size,
+          );
         } catch (err) {
           return json({ error: "storage_error", message: String(err) }, { status: 500 });
         }
@@ -129,7 +133,7 @@ export const Route = createFileRoute("/api/uploads/")({
           shareId: slug,
           url: `${origin}/d/${slug}`,
           expiresAt: expiresAt.toISOString(),
-          uploadUrl,
+          uploadToken,
           deliveryMode,
           passwordRequired: !!password,
           maxDownloads: maxDl ?? null,

@@ -35,17 +35,19 @@ export const Route = createFileRoute("/api/public/v1/me/keys")({
             revokedAt: true,
           },
         });
-        return json({
-          ...rateLimitHeaders("management", rl.remaining, rl.reset),
-          keys: keys.map((k) => ({
-            id: k.id,
-            name: k.name,
-            key_prefix: k.keyPrefix,
-            created_at: k.createdAt,
-            last_used_at: k.lastUsedAt,
-            revoked_at: k.revokedAt,
-          })),
-        });
+        return json(
+          {
+            keys: keys.map((k) => ({
+              id: k.id,
+              name: k.name,
+              key_prefix: k.keyPrefix,
+              created_at: k.createdAt,
+              last_used_at: k.lastUsedAt,
+              revoked_at: k.revokedAt,
+            })),
+          },
+          { headers: rateLimitHeaders("management", rl.remaining, rl.reset) },
+        );
       },
       POST: async ({ request }) => {
         sweepExpired();
@@ -73,16 +75,18 @@ export const Route = createFileRoute("/api/public/v1/me/keys")({
           data: { userId: caller.userId, name: parsed.data.name, keyPrefix: prefix, keyHash: hash },
           select: { id: true, name: true, keyPrefix: true, createdAt: true },
         });
-        return json({
-          ...rateLimitHeaders("management", rl.remaining, rl.reset),
-          key: {
-            id: created.id,
-            name: created.name,
-            key_prefix: created.keyPrefix,
-            created_at: created.createdAt,
+        return json(
+          {
+            key: {
+              id: created.id,
+              name: created.name,
+              key_prefix: created.keyPrefix,
+              created_at: created.createdAt,
+            },
+            token: plain,
           },
-          token: plain,
-        });
+          { headers: rateLimitHeaders("management", rl.remaining, rl.reset) },
+        );
       },
     },
   },

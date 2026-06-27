@@ -22,7 +22,10 @@ export const Route = createFileRoute("/api/public/v1/me/keys/$id")({
           where: { id: params.id, userId: caller.userId },
           data: { revokedAt: new Date() },
         });
-        return json({ ok: true, ...rateLimitHeaders("management", rl.remaining, rl.reset) });
+        return json(
+          { ok: true },
+          { headers: rateLimitHeaders("management", rl.remaining, rl.reset) },
+        );
       },
     },
   },

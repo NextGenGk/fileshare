@@ -83,16 +83,18 @@ export const Route = createFileRoute("/api/public/v1/claims/$code")({
         if (d.maxDownloads && d.downloadCount >= d.maxDownloads)
           return json({ error: "exhausted" }, { status: 410 });
 
-        return json({
-          ...rateLimitHeaders("metadata", rl.remaining, rl.reset),
-          slug: d.slug,
-          name: d.originalName,
-          size: d.sizeBytes,
-          contentType: d.contentType,
-          expiresAt: d.expiresAt,
-          maxDownloads: d.maxDownloads,
-          downloadCount: d.downloadCount,
-        });
+        return json(
+          {
+            slug: d.slug,
+            name: d.originalName,
+            size: d.sizeBytes,
+            contentType: d.contentType,
+            expiresAt: d.expiresAt,
+            maxDownloads: d.maxDownloads,
+            downloadCount: d.downloadCount,
+          },
+          { headers: rateLimitHeaders("metadata", rl.remaining, rl.reset) },
+        );
       },
     },
   },
