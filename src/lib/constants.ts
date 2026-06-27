@@ -1,0 +1,10 @@
+export const MAX_FILE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
+export const DEFAULT_EXPIRY_DAYS = 30;
+export const MAX_EXPIRY_DAYS = 30;
+export const SIGNED_DOWNLOAD_TTL = 60 * 60; // 1 hour
+export const SIGNED_UPLOAD_TTL = 60 * 60 * 2; // 2 hours
+export const BUCKET = "drops";
+export const SLUG_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
+export const SLUG_LENGTH = 8;
+export const API_KEY_PREFIX = "dlv_";
+export const CLAIM_CODE_LENGTH = 4;

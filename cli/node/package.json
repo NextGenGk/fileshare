@@ -1,0 +1,32 @@
+{
+  "name": "fileshare",
+  "version": "1.0.0",
+  "description": "CLI for the FileShare file transfer service.",
+  "type": "module",
+  "bin": {
+    "fileshare": "./src/index.mjs"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "preferGlobal": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NextGenGk/courier-pix.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NextGenGk/courier-pix/issues"
+  },
+  "homepage": "https://github.com/NextGenGk/courier-pix#readme",
+  "keywords": [
+    "fileshare",
+    "file-transfer",
+    "cli",
+    "file-sharing"
+  ]
+}

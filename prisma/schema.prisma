@@ -1,0 +1,79 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Profile {
+  id          String   @id
+  displayName String?  @map("display_name")
+  avatarUrl   String?  @map("avatar_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("profiles")
+}
+
+model UserRole {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id")
+  role      String   @default("user")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, role])
+  @@map("user_roles")
+}
+
+model Drop {
+  id                String    @id @default(uuid()) @db.Uuid
+  slug              String    @unique
+  ownerId           String?   @map("owner_id")
+  originalName      String    @map("original_name")
+  sizeBytes         Int       @default(0) @map("size_bytes")
+  contentType       String?   @map("content_type")
+  data              Bytes?
+  passwordHash      String?   @map("password_hash")
+  claimCode         String?   @unique @map("claim_code")
+  maxDownloads      Int?      @map("max_downloads")
+  downloadCount     Int       @default(0) @map("download_count")
+  expiresAt         DateTime  @map("expires_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  deletedAt         DateTime? @map("deleted_at")
+  uploadCompletedAt DateTime? @map("upload_completed_at")
+
+  events DownloadEvent[]
+
+  @@index([slug])
+  @@index([ownerId])
+  @@index([expiresAt])
+  @@map("drops")
+}
+
+model ApiKey {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id")
+  name       String
+  keyPrefix  String    @map("key_prefix")
+  keyHash    String    @unique @map("key_hash")
+  lastUsedAt DateTime? @map("last_used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  revokedAt  DateTime? @map("revoked_at")
+
+  @@index([userId])
+  @@map("api_keys")
+}
+
+model DownloadEvent {
+  id        BigInt   @id @default(autoincrement()) @db.BigInt
+  dropId    String   @map("drop_id") @db.Uuid
+  ipHash    String?  @map("ip_hash")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  drop Drop @relation(fields: [dropId], references: [id], onDelete: Cascade)
+
+  @@index([dropId])
+  @@map("download_events")
+}
